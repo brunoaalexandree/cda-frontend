@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/config/reactQuery';
 import Provider from '@/lib/providers';
+import { ModalProvider } from '@/providers/modal-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,7 +23,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <ModalProvider />
+            {children}
+          </AuthProvider>
         </Provider>
       </body>
     </html>

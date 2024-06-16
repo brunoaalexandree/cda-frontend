@@ -1,7 +1,7 @@
 'use client';
 
 import { queryClient } from '@/config/reactQuery';
-import { STATE_STORAGE_LOCATION } from '@/const';
+import { STATE_STORAGE_LOCATION, USER_STORAGE_LOCATION } from '@/const'; // Adicione USER_STORAGE_LOCATION
 import parseJwt from '@/lib/parseJwt';
 import { useRouter } from 'next/navigation';
 import { user as fetchUser } from '@/services/profile';
@@ -11,7 +11,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useReducer,
 } from 'react';
@@ -24,7 +23,7 @@ interface User {
 }
 
 interface AuthState {
-  user: User | undefined;
+  user: User | null;
 }
 
 interface AuthContextType {
@@ -40,7 +39,7 @@ interface AuthAction {
 }
 
 const initialAuthState: AuthState = {
-  user: undefined,
+  user: null,
 };
 
 export type AuthProviderProps = {
@@ -52,32 +51,59 @@ export const AuthContext = createContext({} as AuthContextType);
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case 'LOGIN':
-      localStorage.setItem(
-        STATE_STORAGE_LOCATION,
-        action.payload!.access_token,
-      );
-      return { user: action.payload };
+      if (action.payload) {
+        localStorage.setItem(
+          STATE_STORAGE_LOCATION,
+          action.payload.access_token,
+        );
+        localStorage.setItem(
+          USER_STORAGE_LOCATION,
+          JSON.stringify(action.payload),
+        );
+      }
+      return { user: action.payload || null };
     case 'LOGOUT':
       localStorage.removeItem(STATE_STORAGE_LOCATION);
+      localStorage.removeItem(USER_STORAGE_LOCATION);
       queryClient.clear();
-      return { user: undefined };
+      return { user: null };
     default:
       return state;
   }
 };
 
+const initializeAuthState = (): AuthState => {
+  const token = localStorage.getItem(STATE_STORAGE_LOCATION);
+  const storedUser = localStorage.getItem(USER_STORAGE_LOCATION);
+
+  if (token && storedUser) {
+    try {
+      const user = JSON.parse(storedUser) as User;
+      return { user };
+    } catch (error) {
+      console.error('Failed to parse user data:', error);
+      return initialAuthState;
+    }
+  }
+
+  return initialAuthState;
+};
+
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [state, dispatch] = useReducer(authReducer, initialAuthState);
+  const [state, dispatch] = useReducer(
+    authReducer,
+    undefined,
+    initializeAuthState,
+  );
   const router = useRouter();
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem(STATE_STORAGE_LOCATION);
+    localStorage.removeItem(USER_STORAGE_LOCATION);
     queryClient.clear();
-
     dispatch({ type: 'LOGOUT' });
-
     router.push('/sign-in');
-  }, []);
+  }, [router]);
 
   const handleLogin = useCallback(
     async (token: string) => {
@@ -95,41 +121,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
       } catch (error) {
         console.error('Failed to fetch user data', error);
-        handleLogout(); // Sai se falhar
+        handleLogout();
       }
     },
     [handleLogout],
   );
 
-  useEffect(() => {
-    const token = localStorage.getItem(STATE_STORAGE_LOCATION);
-
-    if (!token) {
-      handleLogout();
-      return;
+  const authValidation = () => {
+    if (!state.user) {
+      router.push('/sign-in');
     }
-
-    if (token) {
-      const tokenData = parseJwt(token);
-
-      const expiryTime = new Date(tokenData.exp * 1000);
-      const currentTime = new Date();
-
-      if (expiryTime < currentTime) {
-        handleLogout();
-      }
-    }
-  }, [handleLogout, state.user, state.user?.access_token]);
+  };
 
   const values = useMemo(
-    () =>
-      ({
-        state,
-        dispatch,
-        handleLogout,
-        handleLogin,
-      }) as unknown as AuthContextType,
-    [handleLogout, state, handleLogin],
+    () => ({
+      state,
+      dispatch,
+      handleLogout,
+      handleLogin,
+    }),
+    [state, handleLogout, handleLogin],
   );
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
@@ -139,7 +150,7 @@ export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw Error('useAuth must be used inside an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
 
   return context;

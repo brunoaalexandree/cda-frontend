@@ -1,34 +1,31 @@
 'use client';
 
+import { CardSkeletons } from '@/components/ui/skeletons/CardSkeletons';
+import { useModal } from '@/hooks/useModalStore';
 import { emblems, redeemEmblem } from '@/services/emblems';
 import { userEmblems } from '@/services/profile';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 
 export default function Home() {
+  const { onOpen } = useModal();
+
   const { data: emblemsData, isLoading: emblemsIsLoading } = useQuery({
     queryFn: () => emblems(),
     queryKey: ['emblems'],
   });
 
-  const {
-    data: userEmblemsData,
-    isLoading: userEmblemsIsLoading,
-    refetch,
-  } = useQuery({
+  const { data: userEmblemsData, isLoading: userEmblemsIsLoading } = useQuery({
     queryFn: () => userEmblems(),
     queryKey: ['user-emblems'],
   });
 
   const handleRedeemEmblem = async (emblemId: string) => {
-    const res = await redeemEmblem({ emblemId });
-
-    console.log({ res });
-    refetch();
+    onOpen('minigame', emblemId);
   };
 
   if (userEmblemsIsLoading || emblemsIsLoading) {
-    return <h1>carregando...</h1>;
+    return <CardSkeletons />;
   }
 
   const userEmblemsIds = userEmblemsData.map((emblem: any) => emblem.emblem.id);
@@ -39,7 +36,7 @@ export default function Home() {
 
   return (
     <main className="">
-      <div className="w-52 h-10 relative flex items-center">
+      <div className="w-52 h-10 relative flex items-center mt-10 lg:mt-0">
         <img
           src="/border.svg"
           alt="teste"
@@ -49,7 +46,7 @@ export default function Home() {
           Meus emblemas:
         </h1>
       </div>
-      <div className="mt-8 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         {userEmblemsData.map((emblem: any) => (
           <div className="w-52 h-32 relative bg-cda-blue-900 border border-cda-yellow-400 flex items-center justify-center rounded-md">
             <img
@@ -81,7 +78,7 @@ export default function Home() {
           Todos os emblemas:
         </h1>
       </div>
-      <div className="mt-8 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         {filteredEmblemsData?.map(emblem => (
           <div
             key={emblem.id}

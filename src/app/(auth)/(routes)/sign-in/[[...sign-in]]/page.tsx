@@ -15,12 +15,16 @@ import { AxiosError } from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import { signIn } from '@/services/auth';
+import parseJwt from '@/lib/parseJwt';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useState } from 'react';
 
 export default function Page() {
   const router = useRouter();
   const { control, handleSubmit } = useForm();
   const { handleLogin } = useAuth();
+  const [error, setError] = useState<number | boolean>(false);
 
   const { mutateAsync: authenticate, isPending } = useMutation({
     mutationFn: signIn,
@@ -38,7 +42,12 @@ export default function Page() {
         router.push('/');
       }
     } catch (err) {
-      const { message } = err as AxiosError;
+      const { message, response } = err as AxiosError;
+      if (response?.status === 401) {
+        setError(401);
+      } else if (response?.status !== 401) {
+        setError(true);
+      }
       console.log({ message });
     }
   };
@@ -78,6 +87,18 @@ export default function Page() {
               )}
             />
 
+            {error === 401 ? (
+              <span className="text-xs text-red-500">
+                E-mail ou senha está incorreto!
+              </span>
+            ) : (
+              error && (
+                <span className="text-xs text-red-500">
+                  Erro ao tentar fazer login!
+                </span>
+              )
+            )}
+
             <div className="w-full mt-[40px]">
               <Button
                 className="w-full bg-cda-blue-300 hover:bg-cda-blue-200"
@@ -85,6 +106,14 @@ export default function Page() {
               >
                 Entrar
               </Button>
+              <div className="text-sm text-white w-full text-center mt-4">
+                <span>
+                  Não tem conta?{' '}
+                  <Link className=" text-cda-yellow-400" href="/sign-up">
+                    Crie uma!
+                  </Link>
+                </span>
+              </div>
             </div>
           </form>
         </Form>
