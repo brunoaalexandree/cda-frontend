@@ -46,7 +46,7 @@ export default function Page() {
     } catch (err) {
       const { message, response } = err as AxiosError;
       onOpen('error', undefined, response?.status);
-      console.log({ message, response });
+      console.log({ message });
     }
   };
 
