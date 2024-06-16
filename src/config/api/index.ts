@@ -4,8 +4,7 @@ import { STATE_STORAGE_LOCATION } from '@/const';
 
 export const api = () => {
   const defaultOptions = {
-    baseURL: 'http://localhost:3333',
-    // validateStatus: (statusNumber: number) => statusNumber >= 200 && statusNumber < 300,
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   };
 
   const instance = axios.create(defaultOptions);

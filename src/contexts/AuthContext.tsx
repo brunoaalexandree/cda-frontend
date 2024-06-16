@@ -1,7 +1,7 @@
 'use client';
 
 import { queryClient } from '@/config/reactQuery';
-import { STATE_STORAGE_LOCATION, USER_STORAGE_LOCATION } from '@/const'; // Adicione USER_STORAGE_LOCATION
+import { STATE_STORAGE_LOCATION, USER_STORAGE_LOCATION } from '@/const';
 import parseJwt from '@/lib/parseJwt';
 import { useRouter } from 'next/navigation';
 import { user as fetchUser } from '@/services/profile';
@@ -52,19 +52,23 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case 'LOGIN':
       if (action.payload) {
-        localStorage.setItem(
-          STATE_STORAGE_LOCATION,
-          action.payload.access_token,
-        );
-        localStorage.setItem(
-          USER_STORAGE_LOCATION,
-          JSON.stringify(action.payload),
-        );
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(
+            STATE_STORAGE_LOCATION,
+            action.payload.access_token,
+          );
+          localStorage.setItem(
+            USER_STORAGE_LOCATION,
+            JSON.stringify(action.payload),
+          );
+        }
       }
       return { user: action.payload || null };
     case 'LOGOUT':
-      localStorage.removeItem(STATE_STORAGE_LOCATION);
-      localStorage.removeItem(USER_STORAGE_LOCATION);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STATE_STORAGE_LOCATION);
+        localStorage.removeItem(USER_STORAGE_LOCATION);
+      }
       queryClient.clear();
       return { user: null };
     default:
@@ -73,6 +77,10 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 };
 
 const initializeAuthState = (): AuthState => {
+  if (typeof window === 'undefined') {
+    return initialAuthState;
+  }
+
   const token = localStorage.getItem(STATE_STORAGE_LOCATION);
   const storedUser = localStorage.getItem(USER_STORAGE_LOCATION);
 
@@ -98,8 +106,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem(STATE_STORAGE_LOCATION);
-    localStorage.removeItem(USER_STORAGE_LOCATION);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STATE_STORAGE_LOCATION);
+      localStorage.removeItem(USER_STORAGE_LOCATION);
+    }
     queryClient.clear();
     dispatch({ type: 'LOGOUT' });
     router.push('/sign-in');
