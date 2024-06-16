@@ -7,7 +7,7 @@ import { userEmblems } from '@/services/profile';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 
-export default function Home() {
+export default function Emblems() {
   const { onOpen } = useModal();
 
   const { data: emblemsData, isLoading: emblemsIsLoading } = useQuery({

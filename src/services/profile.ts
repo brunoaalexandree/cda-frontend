@@ -18,6 +18,12 @@ export async function user(token: string) {
   return data;
 }
 
+export async function updateUser(userData: Partial<User>) {
+  const { data } = await api().patch<User>('/user', userData);
+
+  return data;
+}
+
 export async function userEmblems() {
   const { data } = await api().get('/user/emblems');
 

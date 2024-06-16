@@ -31,13 +31,6 @@ export function Sidebar() {
         <MainNavigation />
         <div className="bottom-0 text-white border-t w-full flex items-center justify-between pt-8">
           <div className="flex gap-4">
-            <img
-              src="https://avatars.githubusercontent.com/u/3944953?v=4"
-              alt="Bruno Alexandre"
-              width={48}
-              height={48}
-              className="rounded-full"
-            />
             <div className="flex flex-col">
               <span className="text-base">{state?.user?.name}</span>
               <span className="text-sm">{state?.user?.email}</span>
