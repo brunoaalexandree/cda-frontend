@@ -7,6 +7,16 @@ I didn't have access to any UI to develop, I had some descriptions of what the s
 
 So that's it, folks! ❤️
 
+## Technologies
+
+<strong>The technologies used</strong>
+- [NextJS](https://nextjs.org)
+- [TypeScript](typescriptlang.org/)
+- [Axios](https://axios-http.com)
+- [React Query / TanStack Query](https://tanstack.com)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Shadcn UI](https://ui.shadcn.com)
+
 ## Getting Started
 
 First, run the development server:
