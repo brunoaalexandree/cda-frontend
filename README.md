@@ -7,6 +7,8 @@ I didn't have access to any UI to develop, I had some descriptions of what the s
 
 So that's it, folks! ❤️
 
+### 🟢 Project on: [HERE](https://cda-frontend-tau.vercel.app)
+
 ## Technologies
 
 <strong>The technologies used</strong>
