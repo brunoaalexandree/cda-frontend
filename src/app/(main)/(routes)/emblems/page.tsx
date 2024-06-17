@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { CardSkeletons } from '@/components/ui/skeletons/CardSkeletons';
@@ -48,7 +49,7 @@ export default function Emblems() {
       </div>
       <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         {userEmblemsData.map((emblem: any) => (
-          <div className="w-52 h-32 relative bg-cda-blue-900 border border-cda-yellow-400 flex items-center justify-center rounded-md">
+          <div key={emblem.emblem.id} className="w-52 h-32 relative bg-cda-blue-900 border border-cda-yellow-400 flex items-center justify-center rounded-md">
             <img
               src="/border.svg"
               alt="teste"
@@ -79,7 +80,7 @@ export default function Emblems() {
         </h1>
       </div>
       <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
-        {filteredEmblemsData?.map(emblem => (
+        {filteredEmblemsData?.map((emblem: any) => (
           <div
             key={emblem.id}
             onClick={() => handleRedeemEmblem(emblem.id)}

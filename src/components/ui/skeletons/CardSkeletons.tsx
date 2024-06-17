@@ -1,4 +1,5 @@
-import { Skeleton } from '../skeleton';
+/* eslint-disable @next/next/no-img-element */
+import { Skeleton } from "../skeleton";
 
 export function CardSkeletons() {
   return (
