@@ -1,24 +1,24 @@
-import { useModal } from '@/hooks/useModalStore';
+import { useModal } from "@/hooks/useModalStore";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '../dialog';
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { redeemEmblem } from '@/services/emblems';
-import { generateRandomLetters } from '@/lib/generateRandomLetters';
-import { userEmblems } from '@/services/profile';
+} from "../dialog";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { redeemEmblem } from "@/services/emblems";
+import { generateRandomLetters } from "@/lib/generateRandomLetters";
+import { userEmblems } from "@/services/profile";
 
-export type SuccessMessage = 'SUCCESS' | 'FAILED';
+export type SuccessMessage = "SUCCESS" | "FAILED";
 
 export function ModalGame() {
   const { isOpen, onClose, type, emblemId } = useModal();
-  const isModalOpen = isOpen && type === 'minigame';
+  const isModalOpen = isOpen && type === "minigame";
   const [letters, setLetters] = useState<string[]>([]);
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [timer, setTimer] = useState<number>(7);
   const [progress, setProgress] = useState<number>(0);
@@ -26,11 +26,11 @@ export function ModalGame() {
 
   const { refetch } = useQuery({
     queryFn: () => userEmblems(),
-    queryKey: ['user-emblems'],
+    queryKey: ["user-emblems"],
   });
 
   const resetState = () => {
-    setInput('');
+    setInput("");
     setIsCompleted(false);
     setTimer(7);
     setProgress(100);
@@ -40,7 +40,7 @@ export function ModalGame() {
   useEffect(() => {
     if (isModalOpen) {
       setLetters(generateRandomLetters(5));
-      setInput('');
+      setInput("");
       setIsCompleted(false);
       setTimer(7);
       setProgress(100);
@@ -51,13 +51,13 @@ export function ModalGame() {
     if (!isModalOpen) return;
 
     if (timer === 0) {
-      setSuccess('FAILED');
+      setSuccess("FAILED");
       return;
     }
 
     const interval = setInterval(() => {
-      setTimer(prev => prev - 1);
-      setProgress(prev => prev - 100 / 7);
+      setTimer((prev) => prev - 1);
+      setProgress((prev) => prev - 100 / 7);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -66,19 +66,19 @@ export function ModalGame() {
   const { mutate } = useMutation({
     mutationFn: redeemEmblem,
     onSuccess: () => {
-      setSuccess('SUCCESS');
+      setSuccess("SUCCESS");
       onClose();
       refetch();
     },
-    onError: error => {
-      alert('Erro ao resgatar emblema!');
+    onError: (error) => {
+      alert("Erro ao resgatar emblema!");
       console.error(error);
     },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
-    if (e.target.value === letters.join('')) {
+    if (e.target.value === letters.join("")) {
       setIsCompleted(true);
       if (emblemId) {
         mutate({ emblemId });
@@ -101,21 +101,21 @@ export function ModalGame() {
         </DialogHeader>
         <div className="mt-4 text-center">
           <div className="text-2xl font-bold mb-4 text-cda-yellow-400">
-            {letters.join(' ')}
+            {letters.join(" ")}
           </div>
           <input
             type="text"
             value={input}
             onChange={handleInputChange}
             className="border p-2 rounded w-full text-center"
-            disabled={isCompleted || success === 'FAILED'}
+            disabled={isCompleted || success === "FAILED"}
           />
           <span className="text-[12px] text-cda-yellow-400">
             *atente-se se o capslock está ativo, se não estiver ative-o
           </span>
           {isCompleted && <p className="text-green-500 mt-4">Completado!</p>}
 
-          {!success ? (
+          {!success && !isCompleted ? (
             <>
               <div className="w-full h-2 bg-cda-gray-600 mt-10 rounded relative overflow-hidden">
                 <div
@@ -125,7 +125,8 @@ export function ModalGame() {
               </div>
             </>
           ) : (
-            success === 'FAILED' && (
+            success === "FAILED" &&
+            !isCompleted && (
               <h1 className="bg-red-800 w-full py-2 flex items-center justify-center text-white mt-4">
                 FALHOU
               </h1>
